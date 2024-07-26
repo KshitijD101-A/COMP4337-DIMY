@@ -4,7 +4,7 @@ import time
 import socket
 import random
 from secretsharing import SecretSharer
-from pybloomfilter import BloomFilter
+from pybloom_live import BloomFilter
 
 BROADCAST_IP = '255.255.255.255'
 BROADCAST_PORT = 50000

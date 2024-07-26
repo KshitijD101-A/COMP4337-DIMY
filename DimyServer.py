@@ -1,6 +1,6 @@
 import socket
 import threading
-from pybloomfilter import BloomFilter
+from pybloom_live import BloomFilter
 
 BACKEND_SERVER_IP = '127.0.0.1'
 BACKEND_SERVER_PORT = 55000
