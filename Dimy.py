@@ -11,8 +11,6 @@ BROADCAST_PORT = 50000
 BACKEND_SERVER_IP = '127.0.0.1'
 BACKEND_SERVER_PORT = 55000
 
-cbf_storage = []
-
 # 32 Byte Ephemeral ID generated on nodes
 def generate_ephid():
     return secrets.token_bytes(32)
@@ -28,6 +26,7 @@ def broadcast_share(share):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         sock.sendto(share.encode(), (BROADCAST_IP, BROADCAST_PORT))
+        print(f"Broadcasting share: {share}")
 
 # Each Node can receive these shares
 def receive_shares():
@@ -36,6 +35,7 @@ def receive_shares():
         sock.settimeout(3)
         try:
             data, _ = sock.recvfrom(1024)
+            print(f"Received share: {data.decode()}")
             return data.decode()
         except socket.timeout:
             return None
@@ -125,7 +125,7 @@ def main():
                 dbf.add(encid)
                 dbf_list.append(dbf)
                 print(f"DBF updated with EncID")
-        
+
         # Create new DBFs every 90 seconds
         if time.time() - start_time >= 90:
             dbf = create_bloom_filter()
@@ -136,6 +136,7 @@ def main():
         # Remove DBFs older than 9 minutes
         while len(dbf_list) > 6:
             dbf_list.pop(0)
+            print(f"Removed old DBF")
 
         # Combine DBFs into QBF every 9 minutes
         if time.time() - start_time >= 9 * 60:

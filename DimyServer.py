@@ -13,12 +13,15 @@ def handle_client(client_socket):
         qbf_data = client_socket.recv(1024).decode()
         qbf = BloomFilter.from_base64(qbf_data)
 
+        print(f"Received QBF from client")
+
         # Check for matches in stored CBFs
         matched = any(cbf.intersection(qbf) for cbf in cbf_storage)
         result = 'matched' if matched else 'not matched'
         
         # Send the result back to the client
         client_socket.send(result.encode())
+        print(f"Sent result to client: {result}")
     except Exception as e:
         print(f"Error handling client: {e}")
     finally:
@@ -34,6 +37,7 @@ def server_loop():
     while True:
         # Accept incoming connections
         client_socket, _ = server.accept()
+        print(f"Accepted connection from client")
         # Handle client connection in a new thread
         client_handler = threading.Thread(target=handle_client, args=(client_socket,))
         client_handler.start()
@@ -41,6 +45,7 @@ def server_loop():
 def upload_cbf(cbf):
     # Add the CBF to the storage
     cbf_storage.append(cbf)
+    print(f"Uploaded CBF to storage")
 
 if __name__ == "__main__":
     server_loop()
