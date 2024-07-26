@@ -47,7 +47,7 @@ def reconstruct_ephid(shares):
     except:
         return None
 
-# In case of successful Ephemeral ID regernation by a node, that node will generate an Encounter ID.
+# In case of successful Ephemeral ID regeneration by a node, that node will generate an Encounter ID.
 def generate_encid(ephid):
     private_key = secrets.token_bytes(32)
     public_key = hashlib.sha256(private_key).hexdigest()
@@ -126,21 +126,27 @@ def main():
                 dbf_list.append(dbf)
                 print(f"DBF updated with EncID")
         
-         # Combine DBFs into QBF every 9 minutes
+        # Create new DBFs every 90 seconds
+        if time.time() - start_time >= 90:
+            dbf = create_bloom_filter()
+            dbf_list.append(dbf)
+            print(f"Created new DBF")
+            start_time = time.time()
+
+        # Remove DBFs older than 9 minutes
+        while len(dbf_list) > 6:
+            dbf_list.pop(0)
+
+        # Combine DBFs into QBF every 9 minutes
         if time.time() - start_time >= 9 * 60:
             qbf = combine_all_dbfs(dbf_list)
             print(f"Combined QBF: {qbf}")
             upload_qbf_to_backend(qbf)
 
-            # Reset the timer and clear the dbf_list
-            start_time = time.time()
+            # Clear the dbf_list after combining
             dbf_list.clear()
-
-        if len(dbf_list) > 6:
-            dbf_list.pop(0)
-
+        
         time.sleep(15 - 3 * len(shares))
 
 if __name__ == "__main__":
     main()
-
